@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// schema.prisma
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               Int               @id @default(autoincrement())
+  username         String            @unique
+  firstName        String
+  lastName         String
+  password         String
+  email            String            @unique
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  permissionGroups PermissionGroup[]
+}
+
+model Permissions {
+  id                Int              @id @default(autoincrement())
+  name              String           @unique
+  description       String
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  PermissionGroup   PermissionGroup? @relation(fields: [permissionGroupId], references: [id])
+  permissionGroupId Int?
+}
+
+model PermissionGroup {
+  id          Int           @id @default(autoincrement())
+  name        String        @unique
+  description String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  permissions Permissions[] // Define the many-to-many relation directly
+  users       User[] // Define the many-to-many relation directly
+}
+
+model Drug {
+  id            Int       @id @default(autoincrement())
+  name          String
+  molecule      String
+  stockLevel    Int
+  tags          String[]
+  inventory     Inventory[]
+}
+
+model Inventory {
+  id             Int      @id @default(autoincrement())
+  drug           Drug     @relation(fields: [drugId], references: [id])
+  drugId         Int
+  quantity       Int
+  location       String
+  expirationDate DateTime
+}

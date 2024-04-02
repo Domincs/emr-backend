@@ -1,4 +1,6 @@
-npx sequelize-cli init --config sequelize-cli.config.js
+npx prisma migrate dev --name add-default-user 
+npx prisma migrate deploy
+npx prisma generate
 
 my-app/ ├── src/ │ ├── common/ │ │ └── logger.ts │ ├── config/ │ │ ├── index.ts
 │ │ └── database.ts │ ├── middleware/ │ │ └── authMiddleware.ts │ ├── errors/ │
