@@ -1,30 +1,37 @@
+import dotenv from 'dotenv';
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import passport from 'koa-passport';
 import session from 'koa-session';
-import Router from 'koa-router'; // Import Koa router
+import Router from 'koa-router';
+import cors from '@koa/cors'; // Import CORS middleware
 import authenticationRoutes from './routes/authenticationRoutes';
 import swaggerJSDoc from 'swagger-jsdoc';
+import drugsRoutes from './routes/drugsRoutes';
+import inventoryRoutes from './routes/inventoryRoutes';
 
 const app = new Koa();
-const router = new Router(); // Create a Koa router
-const port = process.env.PORT || 3000;
+const router = new Router();
+const port = process.env.PORT || 8000;
+
+dotenv.config();
+
+// CORS middleware
+app.use(cors());
 
 // Session configuration
-app.keys = ['your-secret-key']; // Set session keys
+app.keys = ['ifuifdfusosufnsoufnsoso'];
 app.use(session(app));
 
-// Initialize Passport.js and restore authentication state if available
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Parse request body using koa-bodyparser middleware
 app.use(bodyParser());
 
-// Authentication routes
-router.use('/auth', authenticationRoutes.routes()); // Use the routes defined in authenticationRoutes
+router.use('/auth', authenticationRoutes.routes());
+router.use('', drugsRoutes.routes());
+router.use('', inventoryRoutes.routes());
 
-// Swagger API documentation
 const swaggerOptions = {
   definition: {
     openapi: '3.0.0',
@@ -35,19 +42,16 @@ const swaggerOptions = {
     },
     servers: [{ url: `http://localhost:${port}` }],
   },
-  apis: ['./routes/authenticationRoutes.ts'], // Specify the path to your route files
+  apis: ['./routes/authenticationRoutes.ts'],
 };
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
 
-// Serve Swagger JSON
 router.get('/swagger.json', async (ctx) => {
   ctx.body = swaggerSpec;
 });
 
-// Mount the router
 app.use(router.routes());
 
-// Serve Swagger UI
 app.use(async (ctx, next) => {
   if (ctx.path === '/api-docs') {
     ctx.response.redirect(`/api-docs?url=/swagger.json`);
@@ -58,12 +62,10 @@ app.use(async (ctx, next) => {
   }
 });
 
-// Error handling middleware
 app.on('error', err => {
   console.error('Server error:', err);
 });
 
-// Start the server
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });

@@ -11,7 +11,7 @@ const router = new Router();
 // Routes for drugs
 router.post('/drugs', async (ctx: Context) => {
   try {
-    const drugData = ctx.request.body as Omit<Drug, 'id'>;
+    const drugData = ctx.request.body as unknown as Omit<Drug, 'id'>;
     const drug = await DrugService.createDrug(drugData);
     sendResponse(ctx, { status: StatusCode.Created, data: drug });
   } catch (error) {
@@ -22,7 +22,7 @@ router.post('/drugs', async (ctx: Context) => {
 router.get('/drugs', async (ctx: Context) => {
   try {
     const { tag } = ctx.query;
-    let drugs: Drug[];
+    let drugs;
     if (tag) {
       drugs = await DrugService.getDrugsByTag(tag as string);
     } else {
